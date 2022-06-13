@@ -8,6 +8,7 @@ module Lib
     getScanStatusText,
     getScanStatus,
     Status (..),
+    getElapsedTime,
   )
 where
 
@@ -20,6 +21,8 @@ import Data.Text.Encoding
 import Data.Text.Encoding (encodeUtf8Builder)
 import Data.Text.IO (putStrLn)
 import Data.Text.Read
+import Data.Time
+import Data.Time.Clock
 import Debug.Trace
 import GHC.Generics
 import GHC.IO
@@ -35,7 +38,8 @@ data Snapshot = Snapshot
 
 data Status = Status
   { requests :: Integer,
-    entry_points :: Integer
+    entry_points :: Integer,
+    elapsed :: String
   }
   deriving (Generic, Show, Eq)
 
@@ -70,9 +74,15 @@ getScanStatus record =
   let json = getScanStatusText record
    in decodeStrict json
 
+getElapsedTime :: Status -> Maybe DiffTime
+getElapsedTime status =
+  parseTimeM True defaultTimeLocale "%H:%M:%S" (elapsed status)
+
 mainIo :: IO b
 mainIo = do
   line <- getLine
   let stats = process line
-  putStrLn (pack $ show stats)
+  case stats of
+    Nothing -> pure ()
+    Just stats -> putStrLn (pack $ show stats)
   mainIo
