@@ -12,18 +12,20 @@ module Lib
 where
 
 import Data.Aeson
+import Data.ByteString hiding (pack, putStrLn)
 import Data.ByteString.Builder (toLazyByteString)
 import Data.Maybe (isJust)
-import Data.Text
+import Data.Text (Text, breakOn, breakOnEnd, dropAround, pack)
+import Data.Text.Encoding
 import Data.Text.Encoding (encodeUtf8Builder)
-import Data.Text.IO
+import Data.Text.IO (putStrLn)
 import Data.Text.Read
 import Debug.Trace
 import GHC.Generics
 import GHC.IO
 import System.Exit
 import Text.Show (Show, show)
-import Prelude hiding (Show, getLine, putStrLn, show)
+import Prelude hiding (Show, drop, dropWhile, getLine, length, putStrLn, show)
 
 data Snapshot = Snapshot
   { timestamp :: Double,
@@ -39,36 +41,38 @@ data Status = Status
 
 instance FromJSON Status
 
-process :: Text -> Maybe Snapshot
+process :: ByteString -> Maybe Snapshot
 process record = do
-  let (timestamp, end) = breakOn " " record
-  timestamp' <- getTimestamp timestamp
+  let (timestamp, end) = breakSubstring " " record
   status <- getScanStatus record
+  timestamp' <- getTimestamp timestamp
   return Snapshot {timestamp = timestamp', status = status}
 
-getTimestamp :: Text -> Maybe Double
+getTimestamp :: ByteString -> Maybe Double
 getTimestamp withBrakets =
-  let stripped = dropAround (== '[') withBrakets
+  let text = decodeUtf8 withBrakets
+      stripped = dropAround (== '[') text
    in case double stripped of
         Left res -> Nothing
         Right (res, _) -> Just res
 
-isScanStatus :: Text -> Bool
+isScanStatus :: ByteString -> Bool
 isScanStatus = isInfixOf "NexPloit::ScanStatus: "
 
-getScanStatusText :: Text -> Text
+getScanStatusText :: ByteString -> ByteString
 getScanStatusText record =
-  let (_, status) = breakOnEnd "NexPloit::ScanStatus: " record
-   in status
+  let tag = "NexPloit::ScanStatus: "
+      (_, status) = breakSubstring tag record
+   in drop (length tag) status
 
-getScanStatus :: Text -> Maybe Status
+getScanStatus :: ByteString -> Maybe Status
 getScanStatus record =
   let json = getScanStatusText record
-   in decode $ toLazyByteString $ encodeUtf8Builder json
+   in decodeStrict json
 
 mainIo :: IO b
 mainIo = do
   line <- getLine
-  let res = process line
-  putStrLn (pack $ show res)
+  let stats = process line
+  putStrLn (pack $ show stats)
   mainIo
