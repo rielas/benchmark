@@ -13,18 +13,18 @@ module Lib
 where
 
 import Data.Aeson
-import Data.ByteString hiding (pack, putStrLn, putStr)
+import Data.ByteString hiding (pack, putStr, putStrLn)
 import Data.ByteString.Builder (toLazyByteString)
 import Data.Maybe (isJust)
 import Data.Text (Text, breakOn, breakOnEnd, dropAround, pack)
-import Data.Text.Encoding
-import Data.Text.Encoding (encodeUtf8Builder)
+import Data.Text.Encoding (decodeUtf8)
 import Data.Text.Read
 import Data.Time
 import Data.Time.Clock
 import Debug.Trace
 import GHC.Generics
 import GHC.IO
+import qualified Stats
 import System.Exit
 import Text.Printf
 import Text.Show (Show, show)
@@ -46,13 +46,6 @@ data Status = Status
 instance FromJSON Status
 
 slices = [2, 3, 5, 8, 13, 21, 34, 55]
-
-data Stats = Stats
-  {  requestsFor2Mins :: Integer,
-     entrypointsFor2Mins :: Integer,
-     requestsFor3Mins :: Integer,
-     entrypointsFor3Mins :: Integer
-  }
 
 process :: ByteString -> Maybe Snapshot
 process record = do
@@ -93,10 +86,10 @@ printStats snapshot =
       requests' = requests . status $ snapshot
       entry_points' = entry_points . status $ snapshot
    in printf
-          "%s requests: %6d,  entry points: %5d"
-          elapsed'
-          requests'
-          entry_points'
+        "%s requests: %6d,  entry points: %5d"
+        elapsed'
+        requests'
+        entry_points'
 
 mainIo :: IO b
 mainIo = do
