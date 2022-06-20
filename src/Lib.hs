@@ -45,8 +45,6 @@ data Status = Status
 
 instance FromJSON Status
 
-slices = [2, 3, 5, 8, 13, 21, 34, 55]
-
 process :: ByteString -> Maybe Snapshot
 process record = do
   let (timestamp, end) = breakSubstring " " record

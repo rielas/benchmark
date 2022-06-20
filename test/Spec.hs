@@ -32,11 +32,38 @@ tests =
             )
         (status >>= getElapsedTime)
           @?= Just (secondsToDiffTime 98 + picosecondsToDiffTime 99290711000),
-      testCase "Work with scan statistics" $ do
+      testCase "Work with empty scan statistics" $ do
         let stats =
               Stats.Stats
                 { Stats.lastTimestamp = "00:01:38.099290711",
                   Stats.slices = Map.empty
                 }
-        Stats.print stats @?= "Stats for 00:01:38.099290711:\n"
+        Stats.print stats @?= "Stats for 00:01:38.099290711:\nrequests:\n",
+      testCase "Work with scan statistics" $ do
+        let stats =
+              Stats.Stats
+                { Stats.lastTimestamp = "00:05:05.0",
+                  Stats.slices =
+                    Map.fromList
+                      [ ( 2,
+                          Stats.Slice
+                            { Stats.requests = 67,
+                              Stats.entrypoints = 1
+                            }
+                        ),
+                        ( 3,
+                          Stats.Slice
+                            { Stats.requests = 77,
+                              Stats.entrypoints = 2
+                            }
+                        ),
+                        ( 5,
+                          Stats.Slice
+                            { Stats.requests = 87,
+                              Stats.entrypoints = 3
+                            }
+                        )
+                      ]
+                }
+        Stats.print stats @?= "Stats for 00:05:05.0:\nrequests:\n2 minutes: 67\n3 minutes: 77\n5 minutes: 87\n"
     ]
