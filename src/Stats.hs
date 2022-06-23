@@ -25,10 +25,21 @@ print stats =
   let lastTimestamp' = lastTimestamp stats
       begin = printf "Stats for %s:\n" lastTimestamp'
 
-      getRequests m = requests <$> lookup m (slices stats)
+      get field m = field <$> lookup m (slices stats)
 
-      printRequests m = fromMaybe "" $ (printf "%d minutes: %d\n") m <$> getRequests m
-      requests1 =
+      getRequests m = get requests m
+
+      getEntrypoints m = get entrypoints m
+
+      printRequests m = maybe "" (printf "%d minutes: %d\n" m) (getRequests m)
+
+      printEntrypoints m = maybe "" (printf "%d minutes: %d\n" m) (getEntrypoints m)
+
+      requestsStats =
         "requests:\n"
           ++ foldl' (\acc t -> acc ++ printRequests t) "" timeIntervals
-   in begin ++ requests1
+
+      entrypointsStats =
+        "\nentrypoints:\n"
+          ++ foldl' (\acc t -> acc ++ printEntrypoints t) "" timeIntervals
+   in begin ++ requestsStats ++ entrypointsStats
