@@ -1,12 +1,14 @@
-module Stats (Stats (..), Stats.print, Slice (..)) where
+module Stats (Stats (..), Stats.print, Slice (..), lastInterval) where
 
 import Control.Monad
 import Control.Monad.Trans.Writer.Strict
-import Data.List hiding (lookup)
-import Data.Map hiding (foldl')
+import Data.List hiding (head, lookup, reverse)
+import Data.List.NonEmpty
+import qualified Data.Map as Map
 import Data.Maybe
+import Data.Time
 import Text.Printf
-import Prelude hiding (lookup)
+import Prelude hiding (head, lookup, reverse)
 
 data Slice = Slice
   { requests :: Integer,
@@ -15,17 +17,23 @@ data Slice = Slice
 
 data Stats = Stats
   { lastTimestamp :: String,
-    slices :: Map Integer Slice
+    slices :: Map.Map Integer Slice
   }
 
-timeIntervals = [2, 3, 5, 8, 13, 21, 34, 55] :: [Integer]
+timeIntervals = 2 :| [3, 5, 8, 13, 21, 34, 55]
+
+lastInterval :: DiffTime -> Integer
+lastInterval time =
+  let minutes = floor time `div` 60
+      first = head timeIntervals :: Integer
+   in fromMaybe first $ find (> minutes) timeIntervals
 
 print :: Stats -> String
 print stats =
   let lastTimestamp' = lastTimestamp stats
       begin = printf "Stats for %s:\n" lastTimestamp'
 
-      get field m = field <$> lookup m (slices stats)
+      get field m = field <$> Map.lookup m (slices stats)
 
       getRequests m = get requests m
 

@@ -65,5 +65,7 @@ tests =
                         )
                       ]
                 }
-        Stats.print stats @?= "Stats for 00:05:05.0:\nrequests:\n2 minutes: 67\n3 minutes: 77\n5 minutes: 87\n\nentrypoints:\n2 minutes: 1\n3 minutes: 2\n5 minutes: 3\n"
+        Stats.print stats @?= "Stats for 00:05:05.0:\nrequests:\n2 minutes: 67\n3 minutes: 77\n5 minutes: 87\n\nentrypoints:\n2 minutes: 1\n3 minutes: 2\n5 minutes: 3\n",
+      testCase "Get the last timestamp" $ do
+        Stats.lastInterval ( secondsToDiffTime 301) @?= 8
     ]

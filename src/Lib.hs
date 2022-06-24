@@ -12,9 +12,11 @@ module Lib
   )
 where
 
+import Control.Monad.State
 import Data.Aeson
 import Data.ByteString hiding (pack, putStr, putStrLn)
 import Data.ByteString.Builder (toLazyByteString)
+import qualified Data.Map as Map
 import Data.Maybe (isJust)
 import Data.Text (Text, breakOn, breakOnEnd, dropAround, pack)
 import Data.Text.Encoding (decodeUtf8)
@@ -51,6 +53,31 @@ process record = do
   status <- getScanStatus record
   timestamp' <- getTimestamp timestamp
   return Snapshot {timestamp = timestamp', status = status}
+
+processStats :: Snapshot -> State Stats.Stats ()
+processStats snapshot = do
+  status' <- get
+  let elapsed' = getElapsedTime $ status snapshot
+      interval = Stats.lastInterval <$> elapsed'
+  case interval of
+    Just i ->
+      let requests' = requests $ status snapshot
+          entry_points' = entry_points $ status snapshot
+          elapsed'' = elapsed $ status snapshot
+          slices' = Stats.slices $ status'
+       in put $
+            status'
+              { Stats.lastTimestamp = elapsed'',
+                Stats.slices =
+                  Map.insert
+                    i
+                    Stats.Slice
+                      { Stats.requests = requests',
+                        Stats.entrypoints = entry_points'
+                      }
+                    slices'
+              }
+    Nothing -> return ()
 
 getTimestamp :: ByteString -> Maybe Double
 getTimestamp withBrakets =
