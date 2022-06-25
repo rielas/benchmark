@@ -46,7 +46,7 @@ printHeader =
 print :: Stats -> String
 print stats =
   let lastTimestamp' = lastTimestamp stats
-      begin = printf "\n%s, " lastTimestamp'
+      begin = printf "%s, " lastTimestamp'
 
       get field m = field <$> Map.lookup m (slices stats)
 
