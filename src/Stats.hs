@@ -10,13 +10,13 @@ where
 
 import Control.Monad
 import Control.Monad.Trans.Writer.Strict
-import Data.List hiding (head, lookup, reverse)
+import Data.List hiding (head, lookup, map, reverse)
 import Data.List.NonEmpty
 import qualified Data.Map as Map
 import Data.Maybe
 import Data.Time
 import Text.Printf
-import Prelude hiding (head, lookup, reverse)
+import Prelude hiding (head, lookup, map, reverse)
 
 data Slice = Slice
   { requests :: Integer,
@@ -39,8 +39,9 @@ lastInterval time =
 printHeader :: String
 printHeader =
   "timestamp,"
-    ++ foldl' (\acc t -> acc ++ printf " req %2d min," t) "" timeIntervals
-    ++ foldl' (\acc t -> acc ++ printf " end %2d min," t) "" timeIntervals
+    ++ intercalate ", " (toList $ map (printf " req %2d min") timeIntervals)
+    ++ ", "
+    ++ intercalate ", " (toList $ map (printf " ent %2d min") timeIntervals)
 
 print :: Stats -> String
 print stats =
@@ -53,17 +54,14 @@ print stats =
 
       getEntrypoints m = get entrypoints m
 
-      printRequests m = maybe "      ," (printf "%6d,") (getRequests m)
+      printRequests :: Integer -> String
+      printRequests m = maybe "      " (printf "%6d") (getRequests m)
 
-      printEntrypoints m = maybe "      ," (printf "%5d,") (getEntrypoints m)
+      printEntrypoints m = maybe "      " (printf "%5d") (getEntrypoints m)
 
-      requestsStats = foldl' (\acc t -> acc ++ printRequests t) "" timeIntervals
+      requestsStats = intercalate ", " $ toList $ map printRequests timeIntervals
 
-      entrypointsStats =
-        foldl'
-          (\acc t -> acc ++ printEntrypoints t)
-          ""
-          timeIntervals
+      entrypointsStats = intercalate ", " $ toList $ map printEntrypoints timeIntervals
    in begin ++ requestsStats ++ entrypointsStats
 
 empty :: Stats

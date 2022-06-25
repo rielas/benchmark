@@ -27,7 +27,8 @@ import Debug.Trace
 import GHC.Generics
 import GHC.IO
 import qualified Stats
-import System.Exit
+import System.Exit (exitSuccess)
+import System.IO (isEOF)
 import Text.Printf
 import Text.Show (Show, show)
 import Prelude hiding (Show, drop, dropWhile, getLine, length, show)
@@ -64,7 +65,7 @@ processStats snapshot = do
       let requests' = requests $ status snapshot
           entry_points' = entry_points $ status snapshot
           elapsed'' = elapsed $ status snapshot
-          slices' = Stats.slices $ status'
+          slices' = Stats.slices status'
        in put $
             status'
               { Stats.lastTimestamp = elapsed'',
@@ -118,21 +119,30 @@ printStats snapshot =
 
 runApp :: StateT Stats.Stats IO ()
 runApp = do
-  lift $ putStrLn $ Stats.printHeader
+  lift $ putStrLn Stats.printHeader
 
   forever $ do
-    line <- lift getLine
-    let stats = process line
+    isClosed <- lift isEOF
 
-    case stats of
-      Just stats -> do
-        processStats stats
-        state <- get
-        lift $ putStrLn $ Stats.print state
-      Nothing -> pure ()
+    if isClosed
+      then lift exitSuccess
+      else getLineAndProcess
 
-    return ()
+    getLineAndProcess
 
 mainIo :: IO ()
 mainIo = do
   evalStateT runApp Stats.empty
+
+getLineAndProcess = do
+  line <- lift getLine
+  let stats = process line
+
+  case stats of
+    Just stats -> do
+      processStats stats
+      state <- get
+      lift $ putStrLn $ Stats.print state
+    Nothing -> pure ()
+
+  return ()

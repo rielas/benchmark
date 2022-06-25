@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 ubuntu:latest as build_image
+FROM ubuntu:latest as builder
 
 WORKDIR /home/benchmark
 
@@ -11,5 +11,16 @@ RUN sh -c 'curl -sSL https://get.haskellstack.org/ | sh'
 
 COPY stack.yaml .
 COPY package.yaml .
+RUN stack setup
 
-RUN stack build
+COPY src src
+COPY app app
+COPY test test
+COPY README.md .
+COPY ChangeLog.md .
+
+RUN stack build --copy-bins
+
+FROM ubuntu:latest
+
+COPY --from=builder /root/.local/bin/benchmark-exe /usr/bin/benchmark

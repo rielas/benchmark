@@ -38,7 +38,7 @@ tests =
                 { Stats.lastTimestamp = "00:01:38.099290711",
                   Stats.slices = Map.empty
                 }
-        Stats.print stats @?= "Stats for 00:01:38.099290711:\nrequests:\n\nentrypoints:\n",
+        Stats.print stats @?= "\n00:01:38.099290711,       ,       ,       ,       ,       ,       ,       ,             ,       ,       ,       ,       ,       ,       ,       ",
       testCase "Work with scan statistics" $ do
         let stats =
               Stats.Stats
@@ -65,7 +65,7 @@ tests =
                         )
                       ]
                 }
-        Stats.print stats @?= "Stats for 00:05:05.0:\nrequests:\n2 minutes: 67\n3 minutes: 77\n5 minutes: 87\n\nentrypoints:\n2 minutes: 1\n3 minutes: 2\n5 minutes: 3\n",
+        Stats.print stats @?= "\n00:05:05.0,     67,     77,     87,       ,       ,       ,       ,           1,     2,     3,       ,       ,       ,       ,       ",
       testCase "Get the last timestamp" $ do
-        Stats.lastInterval ( secondsToDiffTime 301) @?= 8
+        Stats.lastInterval (secondsToDiffTime 301) @?= 8
     ]
