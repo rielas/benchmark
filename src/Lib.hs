@@ -28,7 +28,7 @@ import GHC.Generics
 import GHC.IO
 import qualified Stats
 import System.Exit (exitSuccess)
-import System.IO (isEOF)
+import System.IO (hFlush, isEOF, stdout)
 import Text.Printf
 import Text.Show (Show, show)
 import Prelude hiding (Show, drop, dropWhile, getLine, length, show)
@@ -142,7 +142,9 @@ getLineAndProcess = do
     Just stats -> do
       processStats stats
       state <- get
-      lift $ putStrLn $ Stats.print state
+      lift $ do
+        putStrLn $ Stats.print state
+        hFlush stdout
     Nothing -> pure ()
 
   return ()
