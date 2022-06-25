@@ -54,7 +54,7 @@ process record = do
   timestamp' <- getTimestamp timestamp
   return Snapshot {timestamp = timestamp', status = status}
 
-processStats :: Snapshot -> State Stats.Stats ()
+processStats :: Snapshot -> StateT Stats.Stats IO ()
 processStats snapshot = do
   status' <- get
   let elapsed' = getElapsedTime $ status snapshot
@@ -116,11 +116,23 @@ printStats snapshot =
         requests'
         entry_points'
 
-mainIo :: IO b
+runApp :: StateT Stats.Stats IO ()
+runApp = do
+  lift $ putStrLn $ Stats.printHeader
+
+  forever $ do
+    line <- lift getLine
+    let stats = process line
+
+    case stats of
+      Just stats -> do
+        processStats stats
+        state <- get
+        lift $ putStrLn $ Stats.print state
+      Nothing -> pure ()
+
+    return ()
+
+mainIo :: IO ()
 mainIo = do
-  line <- getLine
-  let stats = process line
-  case stats of
-    Nothing -> pure ()
-    Just stats -> putStrLn $ printStats stats
-  mainIo
+  evalStateT runApp Stats.empty

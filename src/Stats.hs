@@ -1,4 +1,12 @@
-module Stats (Stats (..), Stats.print, Slice (..), lastInterval) where
+module Stats
+  ( Stats (..),
+    Stats.print,
+    Slice (..),
+    lastInterval,
+    empty,
+    printHeader,
+  )
+where
 
 import Control.Monad
 import Control.Monad.Trans.Writer.Strict
@@ -28,10 +36,16 @@ lastInterval time =
       first = head timeIntervals :: Integer
    in fromMaybe first $ find (> minutes) timeIntervals
 
+printHeader :: String
+printHeader =
+  "timestamp,"
+    ++ foldl' (\acc t -> acc ++ printf " req %2d min," t) "" timeIntervals
+    ++ foldl' (\acc t -> acc ++ printf " end %2d min," t) "" timeIntervals
+
 print :: Stats -> String
 print stats =
   let lastTimestamp' = lastTimestamp stats
-      begin = printf "Stats for %s:\n" lastTimestamp'
+      begin = printf "\n%s, " lastTimestamp'
 
       get field m = field <$> Map.lookup m (slices stats)
 
@@ -39,15 +53,18 @@ print stats =
 
       getEntrypoints m = get entrypoints m
 
-      printRequests m = maybe "" (printf "%d minutes: %d\n" m) (getRequests m)
+      printRequests m = maybe "      ," (printf "%6d,") (getRequests m)
 
-      printEntrypoints m = maybe "" (printf "%d minutes: %d\n" m) (getEntrypoints m)
+      printEntrypoints m = maybe "      ," (printf "%5d,") (getEntrypoints m)
 
-      requestsStats =
-        "requests:\n"
-          ++ foldl' (\acc t -> acc ++ printRequests t) "" timeIntervals
+      requestsStats = foldl' (\acc t -> acc ++ printRequests t) "" timeIntervals
 
       entrypointsStats =
-        "\nentrypoints:\n"
-          ++ foldl' (\acc t -> acc ++ printEntrypoints t) "" timeIntervals
+        foldl'
+          (\acc t -> acc ++ printEntrypoints t)
+          ""
+          timeIntervals
    in begin ++ requestsStats ++ entrypointsStats
+
+empty :: Stats
+empty = Stats {lastTimestamp = "", slices = Map.empty}
