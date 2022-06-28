@@ -65,7 +65,7 @@ tests =
                         )
                       ]
                 }
-        Stats.print stats @?= "00:05:05.0,     67,     77,     87,       ,       ,       ,       ,           1,     2,     3,       ,       ,       ,       ,       ",
+        Stats.print stats @?= "00:05:05.0,     67,     77,     87,       ,       ,       ,       ,       ,     1,     2,     3,       ,       ,       ,       ,       ",
       testCase "Get the last timestamp" $ do
         Stats.lastInterval (secondsToDiffTime 301) @?= 8
     ]
