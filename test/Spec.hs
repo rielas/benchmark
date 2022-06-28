@@ -38,7 +38,7 @@ tests =
                 { Stats.lastTimestamp = "00:01:38.099290711",
                   Stats.slices = Map.empty
                 }
-        Stats.print stats @?= "00:01:38.099290711,       ,       ,       ,       ,       ,       ,       ,             ,       ,       ,       ,       ,       ,       ,       ",
+        Stats.print stats @?= "00:01:38.099290711,       ,       ,       ,       ,       ,       ,       ,       ,       ,       ,       ,       ,       ,       ,       ,       ",
       testCase "Work with scan statistics" $ do
         let stats =
               Stats.Stats

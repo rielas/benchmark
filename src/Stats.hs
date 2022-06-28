@@ -62,7 +62,7 @@ print stats =
       requestsStats = intercalate ", " $ toList $ map printRequests timeIntervals
 
       entrypointsStats = intercalate ", " $ toList $ map printEntrypoints timeIntervals
-   in begin ++ requestsStats ++ entrypointsStats
+   in begin ++ requestsStats ++ ", " ++ entrypointsStats
 
 empty :: Stats
 empty = Stats {lastTimestamp = "", slices = Map.empty}
