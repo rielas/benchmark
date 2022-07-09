@@ -69,7 +69,7 @@ tests =
       testCase "Get the last timestamp" $ do
         Stats.lastInterval (secondsToDiffTime 301) @?= 8,
       testCase "When we go outside the time" $ do
-        Stats.lastInterval (secondsToDiffTime 5346) @?= 89,
-      testCase "When we go outside the time" $ do
+        Stats.lastInterval (secondsToDiffTime 5346) @?= 0,
+      testCase "When we go before the time" $ do
         Stats.lastInterval (secondsToDiffTime 1) @?= 2
     ]

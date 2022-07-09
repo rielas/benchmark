@@ -33,8 +33,7 @@ timeIntervals = 2 :| [3, 5, 8, 13, 21, 34, 55, 89]
 lastInterval :: DiffTime -> Integer
 lastInterval time =
   let minutes = floor time `div` 60
-      lastInterval = last timeIntervals :: Integer
-   in fromMaybe lastInterval $ find (> minutes) timeIntervals
+   in fromMaybe 0 $ find (> minutes) timeIntervals
 
 printHeader :: String
 printHeader =
