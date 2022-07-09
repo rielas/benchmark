@@ -28,7 +28,7 @@ data Stats = Stats
     slices :: Map.Map Integer Slice
   }
 
-timeIntervals = 2 :| [3, 5, 8, 13, 21, 34, 55]
+timeIntervals = 2 :| [3, 5, 8, 13, 21, 34, 55, 89]
 
 lastInterval :: DiffTime -> Integer
 lastInterval time =
