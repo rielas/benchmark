@@ -67,5 +67,9 @@ tests =
                 }
         Stats.print stats @?= "00:05:05.0,     67,     77,     87,       ,       ,       ,       ,       ,       ,     1,     2,     3,       ,       ,       ,       ,       ,       ",
       testCase "Get the last timestamp" $ do
-        Stats.lastInterval (secondsToDiffTime 301) @?= 8
+        Stats.lastInterval (secondsToDiffTime 301) @?= 8,
+      testCase "When we go outside the time" $ do
+        Stats.lastInterval (secondsToDiffTime 5346) @?= 89,
+      testCase "When we go outside the time" $ do
+        Stats.lastInterval (secondsToDiffTime 1) @?= 2
     ]

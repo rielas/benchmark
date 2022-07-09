@@ -10,13 +10,13 @@ where
 
 import Control.Monad
 import Control.Monad.Trans.Writer.Strict
-import Data.List hiding (head, lookup, map, reverse)
-import Data.List.NonEmpty
+import Data.List hiding (head, lookup, map, reverse, last)
+import Data.List.NonEmpty (last, NonEmpty((:|)), map, toList)
 import qualified Data.Map as Map
 import Data.Maybe
 import Data.Time
 import Text.Printf
-import Prelude hiding (head, lookup, map, reverse)
+import Prelude hiding (head, lookup, map, reverse, last)
 
 data Slice = Slice
   { requests :: Integer,
@@ -33,8 +33,8 @@ timeIntervals = 2 :| [3, 5, 8, 13, 21, 34, 55, 89]
 lastInterval :: DiffTime -> Integer
 lastInterval time =
   let minutes = floor time `div` 60
-      first = head timeIntervals :: Integer
-   in fromMaybe first $ find (> minutes) timeIntervals
+      lastInterval = last timeIntervals :: Integer
+   in fromMaybe lastInterval $ find (> minutes) timeIntervals
 
 printHeader :: String
 printHeader =
